@@ -1,3 +1,10 @@
+/*
+ * Display the hourly forecast from NOAA / National Weather Service
+ * Author: John Casey (https://github.com/jdcasey)
+ * 
+ * Adapted from: MMM-darksky-hourly (https://github.com/jacquesCedric/MMM-darksky-hourly)
+ */
+
 Module.register("noaahourly", {
 
     defaults: {
