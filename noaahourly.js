@@ -8,21 +8,19 @@
 Module.register("noaahourly", {
 
     defaults: {
-        lat: 0,
-        lon: 0,
+        lat: config.lat,
+        lon: config.lon,
         notificationsOnly: true,
         units: config.units,
         language: config.language,
-        twentyFourHourTime: true,
-        showCurrentWeather: true,
-        showTextSummary: true,
+        timeFormat: config.timeFormat,
         showPrecipitationPossibilityInRow: true,
         showDayInRow: true,
         showIconInRow: true,
         fadeForecast: true,
         updateInterval: 10 * 60 * 1000, // every 5 minutes
         animationSpeed: 1000,
-        initialLoadDelay: 0, // 0 seconds delay
+        initialLoadDelay: 3000, // 0 seconds delay
         retryDelay: 2500,
         maxHoursForecast: 8,   // maximum number of hours to show in forecast
         skipHours: 0,
@@ -47,6 +45,9 @@ Module.register("noaahourly", {
     start: function () {
         Log.info("Starting module: " + this.name);
 
+        this.hourlyData = null;
+        this.currentData = null;
+
         if ( this.config.notificationsOnly ){
           Log.info("This module is in notifications-only mode. We will wait for hourly data from the noaacurrent module.");
           return;
@@ -56,6 +57,10 @@ Module.register("noaahourly", {
     },
 
     updateWeather: function () {
+        if ( this.config.notificationsOnly ){
+            Log.info("This module is in notifications-only mode. We will wait for hourly data from another noaa module.");
+            return;
+        }
       // var url = this.config.apiBase+'/'+this.config.apiKey+'/'+this.config.latitude+','+this.config.longitude+'?units='+units+'&lang='+this.config.language;
       // if (this.config.data) {
       //     // for debugging
@@ -76,17 +81,20 @@ Module.register("noaahourly", {
         }
     },
 
-    processWeather: function (data) {
+    processWeather: function () {
+        if ( this.hourlyData == null || this.currentData == null ){
+            Log.log("Required data is incomplete. Waiting for hourly or current data");
+        }
+
         // Log.log("Processing weather data...");
 
-        this.weatherData = {hourly: data.hourly.properties.periods};
+        this.weatherData = {hourly: this.hourlyData.properties.periods};
 
-        if(data.current != null && 
-            data.current.properties != null &&
-            data.current.properties.probabilityOfPrecipitation != null && 
-            data.current.properties.probabilityOfPrecipitation.values != null){
+        if(this.currentData != null && 
+            this.currentData.properties.probabilityOfPrecipitation != null && 
+            this.currentData.properties.probabilityOfPrecipitation.values != null){
 
-            var precipPeriods = data.current.properties.probabilityOfPrecipitation.values;
+            var precipPeriods = this.currentData.properties.probabilityOfPrecipitation.values;
             precipPeriods.forEach((period)=>{
                 period.start = Date.parse(period.validTime.split('/')[0]);
 
@@ -121,8 +129,20 @@ Module.register("noaahourly", {
             case "DOM_OBJECTS_CREATED":
                 break;
             case "NOAAWEATHER_HOURLY_DATA":
-                this.processWeather(payload);
-                Log.info("Got weather data in notification!");
+                Log.info("Got hourly weather data in notification!");
+                this.hourlyData = payload;
+                if ( this.currentData != null ){
+                    Log.log("Got all the data we need:\nHourly: " + JSON.stringify(this.hourlyData) + "\n\nCurrent: " + JSON.stringify(this.currentData));
+                    this.processWeather();
+                }
+                break;
+            case "NOAAWEATHER_CURRENT_DATA":
+                Log.info("Got current weather data in notification!");
+                this.currentData = payload;
+                if ( this.hourlyData != null ){
+                    Log.log("Got all the data we need:\nHourly: " + JSON.stringify(this.hourlyData) + "\n\nCurrent: " + JSON.stringify(this.currentData));
+                    this.processWeather();
+                }
                 break;
         }
     },
@@ -154,17 +174,17 @@ Module.register("noaahourly", {
     getHourFromTime: function (time) {
         var dt = new Date(Date.parse(time));
         var hour = dt.getHours();
-        if (this.config.twentyFourHourTime) {
+        if (this.config.timeFormat == 24) {
             return hour + ":00";
         }
         else {
-            var twentyFourHourFormat = "am";
+            var ampm = "am";
             if (hour > 11) {
-                twentyFourHourFormat = "pm";
+                ampm = "pm";
             }
             hour = hour % 12;
             hour = (hour == 0) ? 12 : hour;
-            return hour + twentyFourHourFormat;
+            return hour + ampm;
         }
     },
 
