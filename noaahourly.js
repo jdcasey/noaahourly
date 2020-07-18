@@ -26,6 +26,7 @@ Module.register("noaahourly", {
         retryDelay: 2500,
         maxHoursForecast: 8,   // maximum number of hours to show in forecast
         skipHours: 0,
+        tempDecimalPlaces: 0,
         debug: false
     },
 
@@ -35,7 +36,6 @@ Module.register("noaahourly", {
 
     getScripts: function () {
         return [
-        'jsonp.js',
         'moment.js'
         ];
     },
@@ -77,7 +77,7 @@ Module.register("noaahourly", {
     },
 
     processWeather: function (data) {
-        Log.log("Processing weather data...");
+        // Log.log("Processing weather data...");
 
         this.weatherData = {hourly: data.hourly.properties.periods};
 
@@ -174,7 +174,7 @@ Module.register("noaahourly", {
         var classifier = hour.icon.split("/");
         classifier = classifier[classifier.length-1].split("?")[0].split(",")[0];
 
-        Log.log("Weather classifier is: " + classifier);
+        // Log.log("Weather classifier is: " + classifier);
 
         var conditions = {
             "skc": "sunny",
@@ -236,7 +236,7 @@ Module.register("noaahourly", {
     // In each row we can should display
     //  - time, icon, precip, temp
     renderForecastRow: function (data, addClass) {
-        Log.log("Rendering forecast row: " + JSON.stringify(data));
+        // Log.log("Rendering forecast row: " + JSON.stringify(data));
 
         // Start off with our row
         var row = document.createElement("tr");
@@ -249,7 +249,7 @@ Module.register("noaahourly", {
 
         // icon
         var iconClass = this.classifyWeather(data);
-        Log.log("Got icon class: " + iconClass);
+        // Log.log("Got icon class: " + iconClass);
         // var iconHref = data.icon;
         var icon = document.createElement("span");
         icon.className = 'wi weathericon ' + iconClass;
@@ -283,12 +283,12 @@ Module.register("noaahourly", {
         if (this.config.showPrecipitationPossibilityInRow) { row.appendChild(precipPossibility) }
             row.appendChild(temperature)
 
-        Log.log("Adding row: " + row);
+        // Log.log("Adding row: " + row);
         return row;
     },
 
     renderWeatherForecast: function () {
-        Log.log("Rendering forecast...");
+        // Log.log("Rendering forecast...");
         // Placeholders
         var numHours =  this.config.maxHoursForecast;
         var skip = parseInt(this.config.skipHours) + 1;
@@ -297,7 +297,7 @@ Module.register("noaahourly", {
         // if ( this.weatherData != null && this.weatherData.hourly != null ){
             var now = new Date().getTime();
             var filteredHours = this.weatherData.hourly.filter( function(d, i) { return (now < Date.parse(d.startTime) && (i <= (numHours * skip)) && (i % skip == 0)); });
-            Log.log("filtered " + this.weatherData.hourly.length + " hourly data down to: " + filteredHours.length + " using max hours: " + numHours + " and skip: " + skip);
+            // Log.log("filtered " + this.weatherData.hourly.length + " hourly data down to: " + filteredHours.length + " using max hours: " + numHours + " and skip: " + skip);
         // }
         // else{
 
@@ -355,13 +355,13 @@ Module.register("noaahourly", {
     scheduleUpdate: function(delay) {
         var nextLoad = this.config.updateInterval;
         if (typeof delay !== "undefined" && delay >= 0) {
-          nextLoad = delay;
-      }
+            nextLoad = delay;
+        }
 
-      var self = this;
-      setTimeout(function() {
+        var self = this;
+        setTimeout(function() {
           self.updateWeather();
-      }, nextLoad);
+        }, nextLoad);
     }
 
 });
