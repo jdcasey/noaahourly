@@ -52,22 +52,6 @@ Module.register("noaahourly", {
           Log.info("This module is in notifications-only mode. We will wait for hourly data from the noaacurrent module.");
           return;
       }
-
-      this.scheduleUpdate(this.config.initialLoadDelay);
-    },
-
-    updateWeather: function () {
-        if ( this.config.notificationsOnly ){
-            Log.info("This module is in notifications-only mode. We will wait for hourly data from another noaa module.");
-            return;
-        }
-      // var url = this.config.apiBase+'/'+this.config.apiKey+'/'+this.config.latitude+','+this.config.longitude+'?units='+units+'&lang='+this.config.language;
-      // if (this.config.data) {
-      //     // for debugging
-      //     this.processWeather(this.config.data);
-      // } else {
-      //     getJSONP(url, this.processWeather.bind(this), this.processWeatherError.bind(this));
-      // }
     },
 
     findPrecip: (hour, probabilities) => {
@@ -134,7 +118,7 @@ Module.register("noaahourly", {
                 this.hourlyData = payload;
                 this.processWeather();
                 break;
-            case "NOAAWEATHER_CURRENT_DATA":
+            case "NOAAWEATHER_GRIDPOINT_CURRENT_DATA":
                 Log.info("Got current weather data in notification!");
                 this.currentData = payload;
                 this.processWeather();
