@@ -1,7 +1,7 @@
 /*
  * Display the hourly forecast from NOAA / National Weather Service
  * Author: John Casey (https://github.com/jdcasey)
- * 
+ *
  * Adapted from: MMM-darksky-hourly (https://github.com/jacquesCedric/MMM-darksky-hourly)
  */
 
@@ -84,14 +84,15 @@ Module.register("noaahourly", {
     processWeather: function () {
         if ( this.hourlyData == null || this.currentData == null ){
             Log.log("Required data is incomplete. Waiting for hourly or current data");
+            return;
         }
 
         // Log.log("Processing weather data...");
 
         this.weatherData = {hourly: this.hourlyData.properties.periods};
 
-        if(this.currentData != null && 
-            this.currentData.properties.probabilityOfPrecipitation != null && 
+        if(this.currentData != null &&
+            this.currentData.properties.probabilityOfPrecipitation != null &&
             this.currentData.properties.probabilityOfPrecipitation.values != null){
 
             var precipPeriods = this.currentData.properties.probabilityOfPrecipitation.values;
@@ -131,18 +132,12 @@ Module.register("noaahourly", {
             case "NOAAWEATHER_HOURLY_DATA":
                 Log.info("Got hourly weather data in notification!");
                 this.hourlyData = payload;
-                if ( this.currentData != null ){
-                    Log.log("Got all the data we need:\nHourly: " + JSON.stringify(this.hourlyData) + "\n\nCurrent: " + JSON.stringify(this.currentData));
-                    this.processWeather();
-                }
+                this.processWeather();
                 break;
             case "NOAAWEATHER_CURRENT_DATA":
                 Log.info("Got current weather data in notification!");
                 this.currentData = payload;
-                if ( this.hourlyData != null ){
-                    Log.log("Got all the data we need:\nHourly: " + JSON.stringify(this.hourlyData) + "\n\nCurrent: " + JSON.stringify(this.currentData));
-                    this.processWeather();
-                }
+                this.processWeather();
                 break;
         }
     },
@@ -373,15 +368,19 @@ Module.register("noaahourly", {
     },
 
     scheduleUpdate: function(delay) {
-        var nextLoad = this.config.updateInterval;
-        if (typeof delay !== "undefined" && delay >= 0) {
-            nextLoad = delay;
-        }
+      if ( !this.config.notificationsOnly ){
+        Log.log("This service is configured to only respond to data from noaanotifier. Skipping scheduled update");
+      }
 
-        var self = this;
-        setTimeout(function() {
-          self.updateWeather();
-        }, nextLoad);
+      var nextLoad = this.config.updateInterval;
+      if (typeof delay !== "undefined" && delay >= 0) {
+          nextLoad = delay;
+      }
+
+      var self = this;
+      setTimeout(function() {
+        self.updateWeather();
+      }, nextLoad);
     }
 
 });
