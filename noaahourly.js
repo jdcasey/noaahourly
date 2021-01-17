@@ -29,101 +29,85 @@ Module.register("noaahourly", {
     },
 
     getTranslations: function () {
-        return false;
+      return false;
     },
 
     getScripts: function () {
-        return [
+      return [
         'moment.js'
-        ];
+      ];
     },
 
     getStyles: function () {
-        return ["weather-icons.css", "noaahourly.css"];
+      return ["weather-icons.css", "noaahourly.css"];
     },
 
     start: function () {
-        Log.info("Starting module: " + this.name);
+      Log.info("Starting module: " + this.name);
 
-        this.hourlyData = null;
-        this.currentData = null;
-
-        if ( this.config.notificationsOnly ){
-          Log.info("This module is in notifications-only mode. We will wait for hourly data from the noaacurrent module.");
-          return;
-      }
+      this.hourlyData = null;
+      this.currentData = null;
     },
 
     findPrecip: (hour, probabilities) => {
-        var start = Date.parse(hour.startTime);
-        var probability = probabilities.find((p)=>p.start <= start && p.end >= start);
-        if ( probability != null ){
-            hour.probability = probability.value;
-        }
-        else{
-            hour.probability = 0;
-        }
+      var start = Date.parse(hour.startTime);
+      var probability = probabilities.find((p)=>p.start <= start && p.end >= start);
+      if ( probability != null ){
+        hour.probability = probability.value;
+      }
+      else{
+        hour.probability = 0;
+      }
     },
 
     processWeather: function () {
-        if ( this.hourlyData == null || this.currentData == null ){
-            Log.log("Required data is incomplete. Waiting for hourly or current data");
-            return;
-        }
+      if ( this.hourlyData == null || this.currentData == null ){
+        Log.log("Required data is incomplete. Waiting for hourly or current data");
+        return;
+      }
 
-        // Log.log("Processing weather data...");
+      // Log.log("Processing weather data...");
 
-        this.weatherData = {hourly: this.hourlyData.properties.periods};
+      this.weatherData = {hourly: this.hourlyData.properties.periods};
 
-        if(this.currentData != null &&
-            this.currentData.properties.probabilityOfPrecipitation != null &&
-            this.currentData.properties.probabilityOfPrecipitation.values != null){
+      if(this.currentData != null &&
+        this.currentData.properties.probabilityOfPrecipitation != null &&
+        this.currentData.properties.probabilityOfPrecipitation.values != null){
 
-            var precipPeriods = this.currentData.properties.probabilityOfPrecipitation.values;
-            precipPeriods.forEach((period)=>{
-                period.start = Date.parse(period.validTime.split('/')[0]);
+        var precipPeriods = this.currentData.properties.probabilityOfPrecipitation.values;
+        precipPeriods.forEach((period)=>{
+            period.start = Date.parse(period.validTime.split('/')[0]);
 
-                var hours = period.validTime.split('/')[1];
-                period.hours = parseInt(hours.slice(2, hours.length-1));
+            var hours = period.validTime.split('/')[1];
+            period.hours = parseInt(hours.slice(2, hours.length-1));
 
-                period.end = period.start + period.hours * 60 * 60 * 1000;
-            });
+            period.end = period.start + period.hours * 60 * 60 * 1000;
+        });
 
-            this.weatherData.hourly.forEach((hour)=>{
-                this.findPrecip(hour, precipPeriods);
-            });
-        }
+        this.weatherData.hourly.forEach((hour)=>{
+            this.findPrecip(hour, precipPeriods);
+        });
+      }
 
-        this.loaded = true;
-        this.updateDom(this.config.animationSpeed);
-
-        this.scheduleUpdate();
-    },
-
-    processWeatherError: function (error) {
-        if (this.config.debug) {
-            console.log('process weather error', error);
-        }
-
-        // try later
-        this.scheduleUpdate();
+      this.loaded = true;
+      this.updateDom(this.config.animationSpeed);
     },
 
     notificationReceived: function(notification, payload, sender) {
-        switch(notification) {
-            case "DOM_OBJECTS_CREATED":
-                break;
-            case "NOAAWEATHER_HOURLY_DATA":
-                Log.info("Got hourly weather data in notification!");
-                this.hourlyData = payload;
-                this.processWeather();
-                break;
-            case "NOAAWEATHER_GRIDPOINT_CURRENT_DATA":
-                Log.info("Got current weather data in notification!");
-                this.currentData = payload;
-                this.processWeather();
-                break;
-        }
+      switch(notification) {
+          case "DOM_OBJECTS_CREATED":
+              break;
+          case "NOAAWEATHER_HOURLY_DATA":
+              Log.info("Got hourly weather data in notification!");
+              this.hourlyData = payload;
+              this.processWeather();
+              break;
+          case "NOAAWEATHER_GRIDPOINT_CURRENT_DATA":
+              Log.info("Got current weather data in notification!");
+              this.currentData = payload;
+              this.processWeather();
+              break;
+      }
     },
 
     getDom: function() {
@@ -350,21 +334,5 @@ Module.register("noaahourly", {
 
         return temp;
     },
-
-    scheduleUpdate: function(delay) {
-      if ( !this.config.notificationsOnly ){
-        Log.log("This service is configured to only respond to data from noaanotifier. Skipping scheduled update");
-      }
-
-      var nextLoad = this.config.updateInterval;
-      if (typeof delay !== "undefined" && delay >= 0) {
-          nextLoad = delay;
-      }
-
-      var self = this;
-      setTimeout(function() {
-        self.updateWeather();
-      }, nextLoad);
-    }
 
 });
