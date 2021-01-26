@@ -1,15 +1,15 @@
-.noaahourly {
+.wd-hourlyweather {
 }
 
-.noaahourly .dark{
+.wd-hourlyweather .dark{
 	color: #777;
 }
 
-.noaahourly .darker{
+.wd-hourlyweather .darker{
 	color: #444;
 }
 
-.noaahourly .big-icon {
+.wd-hourlyweather .big-icon {
   font-size: 75%;
   line-height: 65px;
   display: inline-block;
@@ -18,50 +18,50 @@
   transform: translate(0, -3px);
 }
 
-.noaahourly .summary {
+.wd-hourlyweather .summary {
   width: 400px;
 }
 
-.noaahourly .forecast {
+.wd-hourlyweather .forecast {
   text-align: right;
   min-width: 400px;
   margin-top: 1ex;
 }
 
-.noaahourly .forecast-row {
+.wd-hourlyweather .forecast-row {
 }
 
-.noaahourly .forecast-row>span {
+.wd-hourlyweather .forecast-row>span {
   display: table-cell;
   width: 1px;
 }
 
-.noaahourly .forecast-row .forecast-day {
+.wd-hourlyweather .forecast-row .forecast-day {
   text-align: left;
   padding-right: 0.1em;
 }
 
-.noaahourly .forecast-row .forecast-hour {
+.wd-hourlyweather .forecast-row .forecast-hour {
   text-align: right;
   padding-right: 0.6em;
 }
 
-.noaahourly .forecast-row .weathericon {
+.wd-hourlyweather .forecast-row .weathericon {
   text-align: center;
   padding-right: 0.5em;
 }
 
-.noaahourly .forecast-bar {
+.wd-hourlyweather .forecast-bar {
   display: table;
   overflow: hidden;
 }
 
-.noaahourly .forecast-bar>span {
+.wd-hourlyweather .forecast-bar>span {
   display: table-cell;
   text-align: center;
 }
 
-.noaahourly .forecast-bar .bar {
+.wd-hourlyweather .forecast-bar .bar {
   background-color: #aaa;
   line-height: 0.8em;
   border-radius: 1em;
@@ -70,12 +70,11 @@
   color: black;
 }
 
-.small.noaahourly .forecast {
+.small.wd-hourlyweather .forecast {
   min-width: 200px;
   max-width: 300px;
 }
 
-.small.noaahourly .summary {
+.small.wd-hourlyweather .summary {
   width: 300px;
 }
-

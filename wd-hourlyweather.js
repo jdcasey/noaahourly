@@ -1,11 +1,11 @@
 /*
- * Display the hourly forecast from NOAA / National Weather Service
+ * Display the hourly forecast from the weatherdata module's notification
  * Author: John Casey (https://github.com/jdcasey)
  *
  * Adapted from: MMM-darksky-hourly (https://github.com/jacquesCedric/MMM-darksky-hourly)
  */
 
-Module.register("noaahourly", {
+Module.register("wd-hourlyweather", {
 
     defaults: {
         units: config.units,
@@ -36,7 +36,7 @@ Module.register("noaahourly", {
     },
 
     getStyles: function () {
-      return ["weather-icons.css", "noaahourly.css"];
+      return ["weather-icons.css", "wd-hourlyweather.css"];
     },
 
     start: function () {
